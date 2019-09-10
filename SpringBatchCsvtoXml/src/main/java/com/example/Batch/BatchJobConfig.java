@@ -34,6 +34,9 @@ public class BatchJobConfig {
 	@Bean
 	public Step helloStep(StepBuilderFactory stepBuilderFactory) {
 		
+		
+		
+		
 		return stepBuilderFactory.get("helloStep").<Employee, String>chunk(10).reader(flatFileItemReader()).processor(processor()).writer(staxEventItemWriter(jaxb2Marshaller())).build();
 	}
 	
