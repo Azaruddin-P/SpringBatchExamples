@@ -32,9 +32,9 @@ public class BatchJobConfig {
 	}
 
 	@Bean
-	public Step helloStep(StepBuilderFactory stepBuilderFactory, ItemReader<Employee> reader, ItemWriter<Employee> writer, ItemProcessor<Employee, Employee> processor) {
+	public Step helloStep(StepBuilderFactory stepBuilderFactory) {
 		
-		return stepBuilderFactory.get("helloStep").<Employee, Employee>chunk(10).reader(reader).processor(processor()).writer(writer).build();
+		return stepBuilderFactory.get("helloStep").<Employee, String>chunk(10).reader(flatFileItemReader()).processor(processor()).writer(staxEventItemWriter(jaxb2Marshaller())).build();
 	}
 	
 	
@@ -74,9 +74,9 @@ public class BatchJobConfig {
 		
 	}
 	@Bean(destroyMethod ="")
-	public StaxEventItemWriter<Employee> staxEventItemWriter(Jaxb2Marshaller jaxb2marshaller){
+	public StaxEventItemWriter<String> staxEventItemWriter(Jaxb2Marshaller jaxb2marshaller){
 		
-			return new StaxEventItemWriterBuilder<Employee>().name("employeeItemWriter").resource(new FileSystemResource("target/test-outputs/employee.xml"))
+			return new StaxEventItemWriterBuilder<String>().name("employeeItemWriter").resource(new FileSystemResource("target/test-outputs/employee.xml"))
 					.marshaller(jaxb2Marshaller()).rootTagName("employeeInfo").build();
 		
 	}

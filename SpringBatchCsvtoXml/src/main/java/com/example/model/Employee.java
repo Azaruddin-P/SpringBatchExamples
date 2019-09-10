@@ -1,3 +1,4 @@
+
 package com.example.model;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -43,7 +44,9 @@ public class Employee {
 	public void setCity(String city) {
 		this.city = city;
 	}
+	@Override
+	public String toString() {
+		return name+" "+designation+" "+city;
 	
-	
-	
+	}
 }
