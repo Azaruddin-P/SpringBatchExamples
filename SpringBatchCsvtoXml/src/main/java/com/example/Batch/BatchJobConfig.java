@@ -54,7 +54,7 @@ public class BatchJobConfig {
 		
 		DefaultLineMapper<Employee> defaultLineMapper = new DefaultLineMapper<>();
 		defaultLineMapper.setLineTokenizer(delimitedLineTokenizer);
-		defaultLineMapper.setFieldSetMapper(EmployeeFieldSetMapper());
+		defaultLineMapper.setFieldSetMapper(new EmployeeFieldSetMapper());
 		
 		flatFileItemReader.setLineMapper(defaultLineMapper);
 		
