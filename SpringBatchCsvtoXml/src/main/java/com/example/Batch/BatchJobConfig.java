@@ -6,6 +6,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.xml.StaxEventItemWriter;
@@ -31,14 +32,14 @@ public class BatchJobConfig {
 	@Bean
 	public Step helloStep(StepBuilderFactory stepBuilderFactory) {
 		
-		return stepBuilderFactory.get("helloStep").<Employee, Employee>chunk(10).reader(flatFileItemReader()).processor(processor()).writer(staxEventItemWriter(jaxb2Marshaller())).build();
+		return stepBuilderFactory.get("helloStep").<Employee, Employee>chunk(3).reader(flatFileItemReader()).processor(processor()).writer(staxEventItemWriter(jaxb2Marshaller())).build();
 	}
 	
 	
 	
 	@Bean
 	public FlatFileItemReader<Employee> flatFileItemReader(){
-		FlatFileItemReader<Employee> flatFileItemReader = new FlatFileItemReader<>();
+		/*FlatFileItemReader<Employee> flatFileItemReader = new FlatFileItemReader<>();
 		flatFileItemReader.setResource(new ClassPathResource("employee.csv"));
 		
 		DelimitedLineTokenizer delimitedLineTokenizer = new DelimitedLineTokenizer();
@@ -49,9 +50,14 @@ public class BatchJobConfig {
 		defaultLineMapper.setLineTokenizer(delimitedLineTokenizer);
 		defaultLineMapper.setFieldSetMapper(new EmployeeFieldSetMapper());
 		
-		
 		flatFileItemReader.setLineMapper(defaultLineMapper);
-		return flatFileItemReader;
+		return flatFileItemReader;*/
+		
+	    return new FlatFileItemReaderBuilder<Employee>()
+		        .name("employeeItemReader")
+		        .resource(new ClassPathResource("employee.csv"))
+		        .delimited().names(new String[] {"name", "designation", "city" })
+		        .targetType(Employee.class).build();
 	}
 	
 	@Bean
