@@ -5,9 +5,6 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
@@ -34,13 +31,8 @@ public class BatchJobConfig {
 	@Bean
 	public Step helloStep(StepBuilderFactory stepBuilderFactory) {
 		
-		
-
-		
-		
-		return stepBuilderFactory.get("helloStep").<Employee, String>chunk(10).reader(flatFileItemReader()).processor(processor()).writer(staxEventItemWriter(jaxb2Marshaller())).build();
+		return stepBuilderFactory.get("helloStep").<Employee, Employee>chunk(10).reader(flatFileItemReader()).processor(processor()).writer(staxEventItemWriter(jaxb2Marshaller())).build();
 	}
-	
 	
 	
 	
@@ -50,14 +42,15 @@ public class BatchJobConfig {
 		flatFileItemReader.setResource(new ClassPathResource("employee.csv"));
 		
 		DelimitedLineTokenizer delimitedLineTokenizer = new DelimitedLineTokenizer();
-		delimitedLineTokenizer.setNames("name", "designation", "city");
+		delimitedLineTokenizer.setNames(new String[] { "name", "designation", "city" });
+
 		
 		DefaultLineMapper<Employee> defaultLineMapper = new DefaultLineMapper<>();
 		defaultLineMapper.setLineTokenizer(delimitedLineTokenizer);
 		defaultLineMapper.setFieldSetMapper(new EmployeeFieldSetMapper());
 		
-		flatFileItemReader.setLineMapper(defaultLineMapper);
 		
+		flatFileItemReader.setLineMapper(defaultLineMapper);
 		return flatFileItemReader;
 	}
 	
@@ -78,9 +71,9 @@ public class BatchJobConfig {
 		
 	}
 	@Bean(destroyMethod ="")
-	public StaxEventItemWriter<String> staxEventItemWriter(Jaxb2Marshaller jaxb2marshaller){
+	public StaxEventItemWriter<Employee> staxEventItemWriter(Jaxb2Marshaller jaxb2marshaller){
 		
-			return new StaxEventItemWriterBuilder<String>().name("employeeItemWriter").resource(new FileSystemResource("target/test-outputs/employee.xml"))
+			return new StaxEventItemWriterBuilder<Employee>().name("employeeItemWriter").resource(new FileSystemResource("target/test-outputs/employee.xml"))
 					.marshaller(jaxb2Marshaller()).rootTagName("employeeInfo").build();
 		
 	}
