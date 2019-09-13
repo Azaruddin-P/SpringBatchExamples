@@ -9,23 +9,19 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.mapping.DefaultLineMapper;
-import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.xml.StaxEventItemWriter;
+import org.springframework.batch.item.xml.builder.StaxEventItemWriterBuilder;
 import org.springframework.batch.support.DatabaseType;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -41,19 +37,21 @@ import com.example.model.Person;
 public class SpringBatchConfig {
     
 	
-	@Bean
-	@Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
-	public Person person() {
-		
-		return new Person();
-	}
 	
 	@Bean
-	@Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
-	public PersonItemProcessor itemProcessor(){
+	public Job jobCsvXml(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory ) {
+		return jobBuilderFactory.get("jobCsvXml").start(step1(stepBuilderFactory)).build();
 		
-		return new PersonItemProcessor();
 	}
+
+	
+	@Bean
+	public Step step1(StepBuilderFactory stepBuilderFactory) {
+		
+		return stepBuilderFactory.get("step1").<Person, Person>chunk(10).reader(flatFileItemReader()).processor(ItemProcessor()).writer(staxEventItemWriter(jaxb2Marshaller())).build();
+	}
+	
+	
 	
 	@Bean
 	public DataSource dataSource() {
@@ -68,22 +66,42 @@ public class SpringBatchConfig {
 		
 		return new ResourcelessTransactionManager();
 	}
+	
 	@Bean
-	public JobRepository jobRepository(DataSource dataSource, ResourcelessTransactionManager resourcelessTransactionManager) throws Exception{
-		
+	public JobRepository jbRepository(DataSource dataSource, ResourcelessTransactionManager transactionManager)
+			throws Exception {
 		JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
 		factory.setDatabaseType(DatabaseType.H2.getProductName());
 		factory.setDataSource(dataSource);
-		factory.setTransactionManager(txManager());
+		factory.setTransactionManager(transactionManager);
 		return factory.getObject();
 	}
+	
+	
 	@Bean
-	public SimpleJobLauncher jobLauncher(JobRepository jobRepository) {
-		SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
-		jobLauncher.setJobRepository(jobRepository);
-		return jobLauncher;
+	public FlatFileItemReader<Person> flatFileItemReader(){
 		
+		return new FlatFileItemReaderBuilder<Person>()
+		        .name("personItemReader")
+		        .resource(new ClassPathResource("employee.csv"))
+		        .delimited().names(new String[] {"id", "firstName", "lastName" })
+		        .targetType(Person.class).build();
+	
 	}
+	
+	@Bean
+	public PersonItemProcessor ItemProcessor(){
+		
+		return new PersonItemProcessor();
+	}
+	
+	@Bean
+	public PersonFieldSetMapper PersonFieldSetMapper() {
+		return new PersonFieldSetMapper();
+	
+	}
+	
+
 	@Bean
 	public Jaxb2Marshaller jaxb2Marshaller() {
 		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
@@ -91,45 +109,17 @@ public class SpringBatchConfig {
 		
 		return jaxb2Marshaller;
 	}
-	@Bean
-	public FlatFileItemReader<Person> flatFileItemReader(){
-		FlatFileItemReader<Person> flatFileItemReader = new FlatFileItemReader<>();
-		flatFileItemReader.setResource(new ClassPathResource("person.csv"));
+	
+	@Bean(destroyMethod = "")
+	public StaxEventItemWriter<Person> staxEventItemWriter(Jaxb2Marshaller marshaller){
 		
-		DelimitedLineTokenizer delimitedLineTokenizer = new DelimitedLineTokenizer();
-		delimitedLineTokenizer.setNames("id", "firstName", "lastName");
 		
-		DefaultLineMapper<Person> defaultLineMapper = new DefaultLineMapper<>();
-		defaultLineMapper.setLineTokenizer(delimitedLineTokenizer);
-		defaultLineMapper.setFieldSetMapper(PersonFieldSetMapper());
-		
-		flatFileItemReader.setLineMapper(defaultLineMapper);
-		
-		return flatFileItemReader;
+		return new StaxEventItemWriterBuilder<Person>().name("personItemWriter").resource(new FileSystemResource("target/test-outputs/person.xml"))
+				.marshaller(jaxb2Marshaller()).rootTagName("personInfo").build();
+	
 	}
 	
-	@Bean
-	public PersonFieldSetMapper PersonFieldSetMapper() {
-		return new PersonFieldSetMapper();
-	}
-	@Bean(destroyMethod= "")
-	public StaxEventItemWriter<Person> staxEventItemWriter(Jaxb2Marshaller marshaller){
-		StaxEventItemWriter<Person> staxEventItemWriter = new StaxEventItemWriter<>();
-		staxEventItemWriter.setResource(new FileSystemResource("C:/workspace/person.xml"));
-		staxEventItemWriter.setMarshaller(marshaller);
-		staxEventItemWriter.setRootTagName("personInfo");
-		
-		return staxEventItemWriter;
-	}
-	@Bean
-	public Job jobCsvXml(JobBuilderFactory jobBuilderFactory, Step step) {
-		return jobBuilderFactory.get("jobCsvXml").incrementer(new RunIdIncrementer()).flow(step).end().build();
-	}
-	@Bean
-	public Step step1(StepBuilderFactory stepBuilderFactory, ResourcelessTransactionManager transactionManager, ItemReader<Person> reader, ItemWriter<Person> writer, ItemProcessor<Person, Person> processor) {
-		
-		return stepBuilderFactory.get("step1").<Person, Person>chunk(10).reader(reader).processor(processor).writer(writer).build();
-	}
+	
 	
 	}
 	

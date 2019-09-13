@@ -7,7 +7,6 @@ public class EmployeeItemProcessor implements org.springframework.batch.item.Ite
 	@Override
 	public Employee process(Employee employee) throws Exception {
 		
-		String s = "Hi iam " + employee.getName() + employee.getDesignation() + "from "+ employee.getCity();
 		
 		Employee e = new Employee();
 		e.setName(employee.getName());
