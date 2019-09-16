@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<employees>
+  <employee>
+    <name>Azar</name>
+    <designation>Developer</designation>
+    <city>Banglore</city>
+  </employee>
+  <employee>
+    <name>Arun</name>
+    <designation>QA</designation>
+    <city>Chennai</city>
+  </employee>
+  <employee>
+    <name>Aakash</name>
+    <designation>Admin</designation>
+    <city>Pune</city>
+  </employee>
+</employees>
