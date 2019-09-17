@@ -8,6 +8,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
@@ -51,8 +52,8 @@ public class BatchConfiguration {
 		return dataSource;
 	}
 
-	@Bean
-	public JdbcCursorItemReader<User> reader() {
+	@Bean(destroyMethod = "")
+	public JdbcCursorItemReader<User> reader() throws ItemStreamException{
 		JdbcCursorItemReader<User> reader = new JdbcCursorItemReader<User>();
 		reader.setDataSource(dataSource);
 		reader.setSql("SELECT * FROM USER");
