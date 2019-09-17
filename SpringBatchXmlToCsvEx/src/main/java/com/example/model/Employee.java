@@ -10,14 +10,9 @@ public class Employee {
 	private String designation;
 	private String city;
 	
-	public Employee () {}
+	public Employee() {}
 
-	public Employee(String name, String designation, String city) {
-		super();
-		this.name = name;
-		this.designation = designation;
-		this.city = city;
-	}
+	
 
 	@XmlElement
 	public String getName() {
