@@ -9,13 +9,11 @@ public class PersonItemProcessor implements ItemProcessor<Person, Person>{
 	@Override
 	public Person process(Person person) throws Exception {
 		
-		System.out.println("processing...."+person);
-		System.out.println(person.getId());
-		System.out.println(person.getFirstName());
-		System.out.println(person.getLastName());
-
-		
-		return person ;
+		Person p = new Person();
+		p.setId(person.getId());
+		p.setFirstName(person.getFirstName());
+		p.setLastName(person.getLastName());
+		return p ;
 	}
 	
 	

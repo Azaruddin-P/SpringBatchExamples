@@ -83,7 +83,7 @@ public class SpringBatchConfig {
 		
 		return new FlatFileItemReaderBuilder<Person>()
 		        .name("personItemReader")
-		        .resource(new ClassPathResource("employee.csv"))
+		        .resource(new ClassPathResource("person.csv"))
 		        .delimited().names(new String[] {"id", "firstName", "lastName" })
 		        .targetType(Person.class).build();
 	
