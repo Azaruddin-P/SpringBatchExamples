@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns = "http://www.springframework.org/schema/beans" 
+   xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance" 
+   xmlns:jdbc = "http://www.springframework.org/schema/jdbc" 
+   xsi:schemaLocation = "http://www.springframework.org/schema/beans 
+      http://www.springframework.org/schema/beans/spring-beans-3.2.xsd 
+      http://www.springframework.org/schema/jdbc 
+      http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd "> 
+      
+     
+
+     
+       
+   <bean id = "dataSource" 
+      class = "org.springframework.jdbc.datasource.DriverManagerDataSource"> 
+      <property name = "url" value = "jdbc:mysql://localhost:3306/springbatch" /> 
+      <property name = "username" value = "root" /> 
+      <property name = "password" value = "Welcome" /> 
+   </bean>
+   
+    <!-- create job-meta tables automatically --> 
+   <jdbc:initialize-database data-source = "dataSource">   
+      <jdbc:script location = "org/springframework/batch/core/schema-drop-mysql.sql" />   
+      <jdbc:script location = "org/springframework/batch/core/schema-mysql.sql" /> 
+   </jdbc:initialize-database> 
+</beans> 
+   
