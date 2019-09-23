@@ -47,12 +47,12 @@ public class ExcelWriter implements ItemWriter<Student> {
 		
 	
 	
-		FileOutputStream out = new FileOutputStream(new File("studentexcel.xlsx"));
+		try(FileOutputStream out = new FileOutputStream(new File("studentexcel.xlsx"))){
 		workbook.write(out);
-		out.close();
+		//out.close();
 		
 	}
 
-	
+	}
 	
 }
