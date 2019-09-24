@@ -44,6 +44,7 @@ public class ExcelWriter implements ItemWriter<Student> {
 
 			i++;
 		}
+<<<<<<< HEAD
 
 		try (FileOutputStream out = new FileOutputStream(new File("studentexcel.xlsx"))) {
 			
@@ -53,4 +54,17 @@ public class ExcelWriter implements ItemWriter<Student> {
 		}
 
 	}
+=======
+		
+	
+	
+		try(FileOutputStream out = new FileOutputStream(new File("studentexcel.xlsx"))){
+		workbook.write(out);
+		//out.close();
+		
+	}
+
+	}
+	
+>>>>>>> 70a127918ff7e29bdbd996c1e0779d439ed466b9
 }
